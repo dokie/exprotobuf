@@ -37,7 +37,13 @@ defmodule Protobuf do
   # Read the file passed to :from
   defp read_file(file, caller) do
     {file, []} = Code.eval_quoted(file, [], caller)
-    File.read!(file)
+    contents = File.read!(file)
+    contents |> handle_imports Path.dirname(file)
+  end
+
+  defp handle_imports(contents, base_path) do
+    replace_import = fn (_, import_filename) -> Path.expand(import_filename, base_path) |> File.read! end
+    Regex.replace(~r/import\s*[\\"']([\w.]*)[\\"']/, contents, replace_import) 
   end
 
   # Read the type or list of types to extract from the schema

@@ -88,6 +88,18 @@ defmodule ProtobufTest do
     assert %{__struct__: ^module} = basic
   end
 
+  test "support define from a file with imports" do
+    defmodule ProtoFromFileWithImports do
+      use Protobuf, from: Path.expand("./proto/outer.proto", __DIR__)
+    end
+
+    outer = ProtoFromFileWithImports.Outer.new(id: "5222d92b-3487-4662-b3cd-595c556f7903", 
+      pair: {}, user_list: [])
+    module = ProtoFromFileWithImports.Outer
+    assert %{__struct__: ^module} = outer
+
+  end
+
   test "define a method to get proto defs" do
     mod  = def_proto_module "message Msg { optional uint32 f1 = 1; }"
     defs = [{{:msg, mod.Msg}, [%Protobuf.Field{name: :f1, fnum: 1, rnum: 2, type: :uint32, occurrence: :optional, opts: []}]}]

@@ -1,0 +1,9 @@
+import "mumble.proto"
+
+message Outer {
+	import "basic.proto"
+
+	required sfixed64 id = 1;
+	optional Basic.AssocPair pair = 2;
+	required UserList user_list = 3;
+}
