@@ -100,6 +100,14 @@ defmodule ProtobufTest do
 
   end
 
+  test "support complex structured files with imports and extensions and options" do
+    defmodule ComplexProto do
+      use Protobuf, from: Path.expand("./proto/nanopb.proto", __DIR__)
+    end
+
+    fdp = ComplexProto.FileDescriptorProto.new
+  end
+
   test "define a method to get proto defs" do
     mod  = def_proto_module "message Msg { optional uint32 f1 = 1; }"
     defs = [{{:msg, mod.Msg}, [%Protobuf.Field{name: :f1, fnum: 1, rnum: 2, type: :uint32, occurrence: :optional, opts: []}]}]

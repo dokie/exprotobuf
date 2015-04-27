@@ -1,0 +1,628 @@
+/************************************************************************
+ ************************************************************************
+ **                                                                    **
+ **                AUTO-GENERATED FILE - DO NOT EDIT                   **
+ **                                                                    **
+ ************************************************************************
+ ************************************************************************/
+
+/**
+ * @file ConfigV2.proto
+ *
+ * (C)opyright 2014 i2O Water Ltd
+ *
+ * Thu Feb 12 15:44:36 2015
+ *
+ * @section DESCRIPTION
+ *
+ * Proteus configuration protocol buffer definitions
+ *
+ * @addtogroup ConfigurationService
+ * @{
+ */
+
+
+import "nanopb.proto";
+import "Proteus.proto";
+
+/*******************************************
+ *              DEFINITIONS                *
+ *******************************************/
+
+/* Protocol buffers 2.5.0 or greater required for allow_alias option */
+// enum ProteusDefinitions {
+//     option allow_alias = true;
+//     GSM_APN_MAX_LEN              = 64;
+//     GSM_USERNAME_MAX_LEN         = 16;
+//     GSM_PASSWORD_MAX_LEN         = 16;
+//     GSM_PIN_MAX_LEN              = 8;
+//     TOTAL_DB_LIST_ITEMS          = 4;
+//     TMAN_NUM_AVAILABLE_ROUTES    = 4;
+//     MAX_CONFIG_ID_LEN            = 16;
+//     MQTT_MAX_PASSWORD_LEN        = 20;
+//     MQTT_MAX_USERNAME_LEN        = 20;
+//     DEFAULT_METRICS_PERIOD       = 900;
+//     TOTAL_DB_LIST_ITEMS          = 4;
+//     TOTAL_DB_FLASH_STORE_ITEMS   = 3;
+//     FILTER_MAX_BLOCKS            = 32;
+//     MAX_FQDN_LEN                 = 80;
+//     MAX_SCHEDULED_COMMS_TRIGGERS = 64;
+//     TEST_STRING_MAX_LEN          = 20;
+//     TEST_ARRAY_MAX_LEN           = 8;
+//     TEST_NUM_ALT_PINS            = 3;
+//     TEST_NUM_BAUD_RATES          = 3;
+//     TEST_MAX_ALARM_THRESHOLDS    = 10;
+//     TEST_MAX_NAME_LEN            = 25;
+//     TEST_MIN_NAME_LEN            = 5;
+//     ALARM_SMS_NO_MAX_LEN         = 16;
+//     LOCATION_NAME_MAX_LEN        = 32;
+//     COMPANY_NAME_MAX_LEN         = 24;
+// }
+
+
+/*******************************************
+ *                  ENUMS                  *
+ *******************************************/
+
+/**
+ * Console store instance
+ */
+enum E_DB_CONSOLE_STORE {
+    option (nanopb_enumopt).long_names = false;
+
+    E_DB_CONSOLE_STORE_1 = 0;
+    E_DB_CONSOLE_STORE_2 = 1;
+}
+
+/**
+ * Acquisition Service driver identifier
+ */
+enum E_ACQ_DRIVER_ID {
+    option (nanopb_enumopt).long_names = false;
+
+    E_ACQ_DRIVER_ID_ADC  = 0;     /**< Analogue to Digital Converter */
+    E_ACQ_DRIVER_ID_IT   = 1;     /**< Integrated Transducer */
+    E_ACQ_DRIVER_ID_PSM  = 2;     /**< Power Source Monitor */
+    E_ACQ_DRIVER_ID_FLOW = 3;     /**< Flow input */
+}
+
+/**
+ * Type of scheduled event (absolute/relative)
+ */
+enum E_SCHED_EVENT_TYPE {
+    option (nanopb_enumopt).long_names = false;
+
+    E_SCHED_EVENT_TYPE_NONE     = 0;     /**< No event (delete) */
+    E_SCHED_EVENT_TYPE_ABSOLUTE = 1;     /**< Absolute event time (triggers at a set clock time) */
+    E_SCHED_EVENT_TYPE_RELATIVE = 2;     /**< Relative event time (triggers at a set time from now) */
+}
+
+/**
+ * Transport Manager session type
+ */
+enum E_TMAN_SESSION_TYPE {
+    option (nanopb_enumopt).long_names = false;
+
+    E_TMAN_SESSION_TYPE_NONE         = 0;     /**< No/invalid session type */
+    E_TMAN_SESSION_TYPE_TCPIP        = 1;     /**< TCPIP Session */
+    E_TMAN_SESSION_TYPE_LOOPBACK     = 2;     /**< Loopback session (for test) */
+    E_TMAN_SESSION_TYPE_MQTT         = 3;     /**< MQTT session */
+    E_TMAN_SESSION_TYPE_UART         = 4;     /**< UART session */
+    E_TMAN_SESSION_TYPE_TEST_NOROUTE = 5;     /**< Test only */
+}
+
+enum E_T_TEST_USERNAMETYPE {
+    option (nanopb_enumopt).long_names = false;
+
+    E_T_TEST_USERNAMETYPE_LONG_NAME  = 0;
+    E_T_TEST_USERNAMETYPE_SHORT_NAME = 1;
+    E_T_TEST_USERNAMETYPE_NICK_NAME  = 2;
+}
+
+/**
+ * Flash store instance
+ */
+enum E_DB_FLASH_STORE {
+    option (nanopb_enumopt).long_names = false;
+
+    E_DB_FLASH_STORE_1 = 0;
+    E_DB_FLASH_STORE_2 = 1;
+    E_DB_FLASH_STORE_3 = 2;
+}
+
+/**
+ * Identifier for a filter block type (mean filter block etc)
+ */
+enum E_FILTER_BLOCK_TYPE {
+    option (nanopb_enumopt).long_names = false;
+
+    E_FILTER_BLOCK_TYPE_NONE         = 0;     /**< No filter block */
+    E_FILTER_BLOCK_TYPE_MEAN         = 1;     /**< Mean filter block */
+    E_FILTER_BLOCK_TYPE_ALARM        = 2;     /**< Alarm filter block */
+    E_FILTER_BLOCK_TYPE_SEND_MESSAGE = 3;     /**< Send Message filter block */
+}
+
+/**
+ * Action for the "Send Message" filter block
+ */
+enum E_SEND_MESSAGE_ACTION {
+    option (nanopb_enumopt).long_names = false;
+
+    E_SEND_MESSAGE_ACTION_LOG = 0;     /**< Log value */
+}
+
+enum E_TEST_STORAGE_METHOD {
+    option (nanopb_enumopt).long_names = false;
+
+    E_TEST_STORAGE_METHOD_NONE    = 0;
+    E_TEST_STORAGE_METHOD_CONSOLE = 1;
+}
+
+/**
+ * Transport protocol identifier
+ */
+enum E_TRANSPORT_PROTOCOL_ID {
+    option (nanopb_enumopt).long_names = false;
+
+    E_TRANSPORT_PROTOCOL_ID_MQTT  = 0;     /**< Message Queue Telemetry Transport protocol */
+    E_TRANSPORT_PROTOCOL_ID_TCPIP = 1;     /**< TCP/IP protocol */
+    E_TRANSPORT_PROTOCOL_ID_UART  = 2;     /**< UART protocol */
+}
+
+/**
+ * Diagnostic level (currently just ON/OFF)
+ */
+enum E_DIAG_LEVEL {
+    option (nanopb_enumopt).long_names = false;
+
+    E_DIAG_LEVEL_OFF     = 0;     /**< Diagnostics off */
+    E_DIAG_LEVEL_ERROR   = 1;     /**< Diagnostics level error */
+    E_DIAG_LEVEL_WARNING = 2;     /**< Diagnostics level warning */
+    E_DIAG_LEVEL_INFO    = 3;     /**< Diagnostics level info */
+    E_DIAG_LEVEL_DEBUG   = 4;     /**< Diagnostics level debug */
+}
+
+/**
+ * Database storage method
+ */
+enum E_DB_STORAGE_METHOD {
+    option (nanopb_enumopt).long_names = false;
+
+    E_DB_STORAGE_METHOD_NONE    = 0;
+    E_DB_STORAGE_METHOD_CONSOLE = 1;
+    E_DB_STORAGE_METHOD_FLASH   = 2;
+}
+
+
+/*******************************************
+ *                  TYPES                  *
+ *******************************************/
+
+enum E_CONFIG_MessageID
+{
+    option (nanopb_enumopt).long_names = false;
+
+    E_CONFIG_MESSAGE_ID_M_CONFIG_FILTERSERVICEDIAGNOSTICS = 100;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_FILTERBLOCK = 101;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_CONFIGURATIONSERVICEDIAGNOSTICS = 200;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_CONFIGURATIONID = 201;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_MESSAGEBROKERDIAGNOSTICS = 300;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_OSALDIAGNOSTICS = 400;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_ACQDIAGNOSTICS = 500;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_ACQCHANNELOFFSET = 502;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_ACQCHANNELSCALING = 503;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_MQTTDIAGNOSTICS = 700;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_MQTTBROKERINFORMATION = 701;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_MQTTCREDENTIALS = 702;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_ALARMSERVICEDIAGNOSTICS = 800;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_ALARMTRIGGER = 801;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_ALARMDETAILS = 802;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_GSMDIAGNOSTICS = 900;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_GSM_APN_INFO = 901;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_GSM_SIM_PIN = 902;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_GSM_ALARMNOTIFICATION = 903;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_SCHEDULERDIAGNOSTICS = 1000;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_SCHEDULEDEVENT = 1001;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_SCHEDULEDACQUISITION = 1002;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_SCHEDULEDCOMMSTRIGGER = 1003;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_ADCDRIVERDIAGNOSTICS = 1100;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_ITDRIVERDIAGNOSTICS = 1200;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_PSMDRIVERDIAGNOSTICS = 1300;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_COMMSSERVICEDIAGNOSTICS = 1400;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_COMMSSESSIONPARAMETERS = 1401;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_MMISERVICEDIAGNOSTICS = 1500;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_MMISESSIONPARAMETERS = 1501;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_DATABASESERVICEDIAGNOSTICS = 1600;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_FILEUPDATEMANAGERDIAGNOSTICS = 1700;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_ATHANDLERDIAGNOSTICS = 1800;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_GSMMULTIPEXERDIAGNOSTICS = 1900;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_UARTPROTOCOLDIAGNOSTICS = 2000;
+    E_CONFIG_MESSAGE_ID_M_CONFIG_LOCATIONINFORMATION = 2100;
+}
+
+/*
+ * Common diagnostic logging information
+ * SUB-MESSAGE ONLY - requires context
+ */
+message M_CONFIG_DiagInfo {
+    required E_DIAG_LEVEL diag_level       = 1;
+    optional uint32       metrics_period_s = 2 [default = 0]; // Diagnostic metrics time period in seconds, zero for no metrics
+}
+
+/*
+ * Comms/MMI Service session parameter configuration
+ * SUB-MESSAGE ONLY - requires context
+ */
+message M_CONFIG_SessionParameters {
+    optional uint32 connection_retry_delay_secs = 1;
+    optional uint32 connection_retries          = 2;
+    optional uint32 session_retry_delay_secs    = 3;
+    optional uint32 session_retries             = 4;
+    optional uint32 comms_inactivity_timeout    = 5;
+    optional uint32 max_session_time            = 6;
+    optional uint32 max_failed_session_count    = 7;
+}
+
+/*
+ * Filter Service diagnostic configuration
+ * Message ID = 100
+ */
+message M_CONFIG_FilterServiceDiagnostics {
+    required M_CONFIG_DiagInfo diag_info = 1;
+}
+
+/*
+ * Generic sub-structure for filter block chain indexing. Chain only supports FILTER_MAX_BLOCKS total entries.
+ * SUB-MESSAGE ONLY - requires context
+ */
+message M_CONFIG_FilterChainInfo {
+    required E_ANALOGUE_CHANNEL_ID channel_id = 1;
+    required uint32                index      = 2;
+}
+
+/*
+ * Configuration for the Mean filter block
+ * SUB-MESSAGE ONLY - requires context
+ */
+message M_CONFIG_MeanFilter {
+    required uint32 samples                 = 1;
+    optional bool   generate_min            = 2 [default = false];
+    optional bool   generate_max            = 3 [default = false];
+    optional bool   generate_sum_of_squares = 4 [default = false];
+}
+
+/*
+ * Configuration for "Send Message" filter block
+ * SUB-MESSAGE ONLY - requires context
+ */
+message M_CONFIG_SendMessageFilter {
+    optional E_SEND_MESSAGE_ACTION action           = 1 [default = E_SEND_MESSAGE_ACTION_LOG];
+    optional bool                  drop_all_invalid = 2 [default = true];
+}
+
+/*
+ * Configuration for the alarm filter block
+ * SUB-MESSAGE ONLY - requires context
+ */
+message M_CONFIG_AlarmFilter {
+    required float   high_threshold  = 1;
+    required float   low_threshold   = 2;
+    required float   high_deadband   = 3;
+    required float   low_deadband    = 4;
+    required uint32  ring_in_samples = 5;
+}
+
+/*
+ * Union type of possible block configurations. Only one may be defined.
+ * SUB-MESSAGE ONLY - requires context
+ */
+message M_CONFIG_FilterBlockUnion {
+    optional M_CONFIG_MeanFilter        mean_config         = 1;
+    optional M_CONFIG_SendMessageFilter send_message_config = 2;
+    optional M_CONFIG_AlarmFilter       alarm_config        = 3;
+}
+
+/*
+ * Filter block configuration
+ * Message ID = 101
+ */
+message M_CONFIG_FilterBlock {
+    required M_CONFIG_FilterChainInfo  chain_info = 1;
+    required E_FILTER_BLOCK_TYPE       block_type = 2;
+    optional M_CONFIG_FilterBlockUnion u          = 3;
+}
+
+/*
+ * Configuration Service diagnostic configuration
+ * Message ID = 200
+ */
+message M_CONFIG_ConfigurationServiceDiagnostics {
+    required M_CONFIG_DiagInfo diag_info = 1;
+}
+
+/*
+ * ID of current configuration
+ * Message ID = 201
+ */
+message M_CONFIG_ConfigurationID {
+    required bytes id = 1 [(nanopb).max_size = 16]; // {MAX_CONFIG_ID_LEN = 16}
+}
+
+/*
+ * Message Broker diagnostic configuration
+ * Message ID = 300
+ */
+message M_CONFIG_MessageBrokerDiagnostics {
+    required M_CONFIG_DiagInfo diag_info = 1;
+}
+
+/*
+ * OSAL diagnostic configuration
+ * Message ID = 400
+ */
+message M_CONFIG_OSALDiagnostics {
+    required M_CONFIG_DiagInfo diag_info = 1;
+}
+
+/*
+ * ACQ diagnostic configuration
+ * Message ID = 500
+ */
+message M_CONFIG_AcqDiagnostics {
+    required M_CONFIG_DiagInfo diag_info = 1;
+}
+
+/*
+ * Acquisition Service channel offset
+ * Message ID = 502
+ */
+message M_CONFIG_AcqChannelOffset {
+    required E_ANALOGUE_CHANNEL_ID channel_id = 1;
+    required float                 offset     = 2;
+}
+
+/*
+ * Acquisition Service channel scaling (use value 1.0 for no scaling)
+ * Message ID = 503
+ */
+message M_CONFIG_AcqChannelScaling {
+    required E_ANALOGUE_CHANNEL_ID channel_id = 1;
+    required float                 scaling    = 2;
+}
+
+/*
+ * MQTT diagnostic configuration
+ * Message ID = 700
+ */
+message M_CONFIG_MQTTDiagnostics {
+    required M_CONFIG_DiagInfo diag_info = 1;
+}
+
+/*
+ * MQTT Broker Information
+ * Message ID = 701
+ */
+message M_CONFIG_MQTTBrokerInformation {
+    optional bytes  FQDN = 1 [(nanopb).max_size = 80]; // {MAX_FQDN_LEN = 80}
+    optional uint32 port = 2;
+}
+
+/*
+ * MQTT Credentials
+ * Message ID = 702
+ */
+message M_CONFIG_MQTTCredentials {
+    optional bytes username = 1 [(nanopb).max_size = 20]; // {MQTT_MAX_USERNAME_LEN = 20}
+    optional bytes password = 2 [(nanopb).max_size = 20]; // {MQTT_MAX_PASSWORD_LEN = 20}
+}
+
+/*
+ * Alarm Service diagnostic configuration
+ * Message ID = 800
+ */
+message M_CONFIG_AlarmServiceDiagnostics {
+    required M_CONFIG_DiagInfo diag_info = 1;
+}
+
+/*
+ * Alarm trigger configuration
+ * Message ID = 801
+ */
+message M_CONFIG_AlarmTrigger {
+    optional bool  trigger_on_assert   = 1 [default = false];
+    optional bool  trigger_on_deassert = 2 [default = false];
+}
+
+/*
+ * Alarm details
+ * Message ID = 802
+ */
+message M_CONFIG_AlarmDetails {
+    required E_ANALOGUE_CHANNEL_ID channel_id           = 1;
+    required E_ALARM_ID            alarm_id             = 2;
+    optional M_CONFIG_AlarmTrigger log_trigger          = 3;
+    optional M_CONFIG_AlarmTrigger comms_trigger        = 4;
+    optional M_CONFIG_AlarmTrigger notification_trigger = 5;
+}
+
+/*
+ * GSM TCP/IP Protocol Service diagnostic configuration
+ * Message ID = 900
+ */
+message M_CONFIG_GSMDiagnostics {
+    required M_CONFIG_DiagInfo diag_info = 1;
+}
+
+/*
+ * APN details for GPRS connection
+ * Message ID = 901
+ */
+message M_CONFIG_GSM_APN_Info {
+    required bytes address  = 1 [(nanopb).max_size = 64]; // {GSM_APN_MAX_LEN = 64}
+    required bytes username = 2 [(nanopb).max_size = 16]; // {GSM_USERNAME_MAX_LEN = 16}
+    required bytes password = 3 [(nanopb).max_size = 16]; // {GSM_PASSWORD_MAX_LEN = 16}
+}
+
+/*
+ * SIM PIN info for GSM
+ * Message ID = 902
+ */
+message M_CONFIG_GSM_SIM_PIN {
+    required bytes pin = 1 [(nanopb).max_size = 8]; // {GSM_PIN_MAX_LEN = 8}
+}
+
+/*
+ * Alarm SMS configuration
+ * Message ID = 903
+ */
+message M_CONFIG_GSM_AlarmNotification {
+    optional string sms_no = 1 [(nanopb).max_size = 16]; // {ALARM_SMS_NO_MAX_LEN = 16}STRING
+}
+
+/*
+ * Scheduler Service diagnostic configuration
+ * Message ID = 1000
+ */
+message M_CONFIG_SchedulerDiagnostics {
+    required M_CONFIG_DiagInfo diag_info = 1;
+}
+
+/*
+ * Scheduled event - sub-message only
+ * Message ID = 1001
+ */
+message M_CONFIG_ScheduledEvent {
+    required E_SCHED_EVENT_TYPE type     = 1; // Absolute or relative
+    required uint32             time_s   = 2; // Initial time, in seconds
+    required uint32             repeat_s = 3; // Repeat time, in seconds
+    optional bool               align    = 4 [default = true]; // True to align on time boundaries (relative only)
+}
+
+/*
+ * Scheduled event to read from an analogue channel
+ * Message ID = 1002
+ */
+message M_CONFIG_ScheduledAcquisition {
+    required M_CONFIG_ScheduledEvent event      = 1;
+    required E_ANALOGUE_CHANNEL_ID   channel_id = 2;
+}
+
+/*
+ * Scheduled event to trigger a communications session
+ * Message ID = 1003
+ */
+message M_CONFIG_ScheduledCommsTrigger {
+    required uint32                  index = 1;
+    required M_CONFIG_ScheduledEvent event = 2;
+}
+
+/*
+ * ADC Driver diagnostic configuration
+ * Message ID = 1100
+ */
+message M_CONFIG_ADCDriverDiagnostics {
+    required M_CONFIG_DiagInfo diag_info = 1;
+}
+
+/*
+ * IT Driver diagnostic configuration
+ * Message ID = 1200
+ */
+message M_CONFIG_ITDriverDiagnostics {
+    required M_CONFIG_DiagInfo diag_info = 1;
+}
+
+/*
+ * PSM Driver diagnostic configuration
+ * Message ID = 1300
+ */
+message M_CONFIG_PSMDriverDiagnostics {
+    required M_CONFIG_DiagInfo diag_info = 1;
+}
+
+/*
+ * Comms Service diagnostic configuration
+ * Message ID = 1400
+ */
+message M_CONFIG_CommsServiceDiagnostics {
+    required M_CONFIG_DiagInfo diag_info = 1;
+}
+
+/*
+ * Comms Service session parameter configuration
+ * Message ID = 1401
+ */
+message M_CONFIG_CommsSessionParameters {
+    required M_CONFIG_SessionParameters params = 1;
+}
+
+/*
+ * MMI Service diagnostic configuration
+ * Message ID = 1500
+ */
+message M_CONFIG_MMIServiceDiagnostics {
+    required M_CONFIG_DiagInfo diag_info = 1;
+}
+
+/*
+ * MMI Service session parameter configuration
+ * Message ID = 1501
+ */
+message M_CONFIG_MMISessionParameters {
+    required M_CONFIG_SessionParameters params = 1;
+}
+
+/*
+ * Database Service diagnostic configuration
+ * Message ID = 1600
+ */
+message M_CONFIG_DatabaseServiceDiagnostics {
+    required M_CONFIG_DiagInfo diag_info = 1;
+}
+
+/*
+ * File Update Manager diagnostic configuration
+ * Message ID = 1700
+ */
+message M_CONFIG_FileUpdateManagerDiagnostics {
+    required M_CONFIG_DiagInfo diag_info = 1;
+}
+
+/*
+ * AT Handler diagnostic configuration
+ * Message ID = 1800
+ */
+message M_CONFIG_ATHandlerDiagnostics {
+    required M_CONFIG_DiagInfo diag_info = 1;
+}
+
+/*
+ * GSM Multiplexer diagnostic configuration
+ * Message ID = 1900
+ */
+message M_CONFIG_GSMMultipexerDiagnostics {
+    required M_CONFIG_DiagInfo diag_info = 1;
+}
+
+/*
+ * UART Protocol diagnostic configuration
+ * Message ID = 2000
+ */
+message M_CONFIG_UARTProtocolDiagnostics {
+    required M_CONFIG_DiagInfo diag_info = 1;
+}
+
+/*
+ * Device location information
+ * Message ID = 2100
+ */
+message M_CONFIG_LocationInformation {
+    required string location_name = 1 [(nanopb).max_size = 32]; // {LOCATION_NAME_MAX_LEN = 32}STRING
+    required string company_name  = 2 [(nanopb).max_size = 24]; // {COMPANY_NAME_MAX_LEN = 24}STRING
+}
+
+
+
+/**
+ * @}
+ */

@@ -1,0 +1,783 @@
+
+import "nanopb.proto";
+import "Proteus.proto";
+
+/*
+ * This protocol buffers definition file defines the structure for the OTAP between Proteus and Anapos.
+ * The OTAP uses the MQTT topics to define specific messages. These protocol buffer messages define the
+ * contents of these messages.
+ * @note This may be removed and replaced by a set of "supported feature" flags instead
+ */
+
+/*
+ * Device Profile submessage
+ */
+message T_OTAP_DeviceProfile
+{
+    /* Unique Proteus Device ID (null terminated) */
+    required string device_id = 1 [(nanopb).max_size = 13];
+
+    /* Device software version (null terminated) */
+    required string software_version = 3 [(nanopb).max_size = 9];
+
+    /* Device hardware version (null terminated) */
+    optional string hardware_version = 4 [(nanopb).max_size = 9];
+
+    /* Number of internal pressure transducers, as built */
+    optional uint32  num_pressure_transducers = 5;
+
+    /* Number of flow inputs, as built */
+    optional uint32  num_flow_inputs = 6;
+
+    /** Number of expansion ports present (0 or 1) */
+    optional uint32  num_expansion_inputs = 7;
+}
+
+/*
+ * Device status submessage
+ */
+message T_OTAP_DeviceStatus
+{
+    /* Current device time (milliseconds since 00:00 1-1-1970 UTC) */
+    required int64 timestamp_ms = 2;
+
+    /* Alarm state - TODO report states in this message? */
+    optional bool alarm_state = 3 [default = false];
+
+    /* Indicated that the unit is in Service mode */
+    optional bool service_mode_enabled = 4 [default = false];
+
+    /* Indicates the unit has been decommissioned */
+    optional bool decommissioned = 5 [default = false];
+
+    /* Local config identifier (128 bit GUID) */
+    optional bytes local_config_id = 6 [(nanopb).max_size = 16];
+
+    /* ... */
+}
+
+/*
+ * ANNOUNCE message - sent by Proteus device when a session
+ * is started.
+ */
+message T_OTAP_Announce
+{
+    required T_OTAP_DeviceProfile device_profile = 1;
+
+    required T_OTAP_DeviceStatus device_status = 2;
+
+    /* Reason for this comms connection */
+    optional E_OTAP_CONNECT_TRIGGER connection_trigger = 3 [default = E_OTAP_CONNECT_TRIGGER_SCHEDULED];
+}
+
+/*
+ * Operation result codes
+ */
+enum T_OTAP_ResultCode
+{
+    /* Prevent nanopb from creating very long names for enum items */
+    option (nanopb_enumopt).long_names = false;
+
+    OTAP_RESULT_CODE_OK             = 1;
+    OTAP_RESULT_CODE_FAILED         = 2;
+
+    /* ... */
+}
+
+/*
+ * Error codes when file transfer fails
+ */
+enum T_OTAP_TransactionError
+{
+    /* Prevent nanopb from creating very long names for enum items */
+    option (nanopb_enumopt).long_names = false;
+
+    OTAP_TRANSACTION_OK                         = 0;
+    OTAP_TRANSACTION_CRC_FAILED                 = 1;
+    OTAP_TRANSACTION_FULL_FAILED                = 2;
+    OTAP_TRANSACTION_TOO_MANY_DOWNLOADS_FAILED  = 3;
+    OTAP_TRANSACTION_OUT_OF_ORDER_DATA_FAILED   = 4;
+    OTAP_TRANSACTION_GEOMETRY_CHECK_FAILED      = 5;
+    OTAP_TRANSACTION_WRITE_FAILED               = 6;
+    OTAP_TRANSACTION_BAD_FILENAME               = 7;
+}
+
+/*********************************************************************************************
+
+   FILE WRITE (DOWNLOAD TO PROTEUS)
+
+ *********************************************************************************************/
+
+/*
+ * Write a block of data to a file.
+ *
+ * There is no explicit open-write-close sequence.  All file writes
+ * implicitly include an "open", it is up to the receiver to
+ * perform and optimize low-level file open/close operations.
+ */
+message T_OTAP_FileWriteBlock
+{
+    /*
+     * Name of file to write (null terminated)
+     */
+    required string file_name = 1 [(nanopb).max_size = 50];
+
+    /*
+     * Transaction ID -, all write block commands for a single file write
+     * operation have same ID
+     */
+    required uint32 transaction_id = 2;
+
+    /*
+     * Offset in file at which to write file data
+     */
+    required uint32 write_offset = 3;
+
+    /*
+     * File block data to be written to the device
+     * (Nanopb creates a data substructure with bytes[] and size fields for this)
+     */
+    required bytes data = 4 [(nanopb).max_size = 1024];
+
+    /*
+     * File size (total)
+     */
+    required uint32 file_size = 5;
+
+    /*
+     * File CRC32
+     */
+    required uint32 file_crc = 6;
+}
+
+/*
+ * File Write Complete message
+ *
+ * Sent by Proteus when a file write transaction has completed
+ * (ie entire file has been downloaded and written to storage, and optionally activated)
+ */
+message T_OTAP_TransactionComplete
+{
+    /*
+     * Name of file (null terminated)
+     */
+    required string file_name = 1 [(nanopb).max_size = 50];
+
+    /*
+     * Transaction ID
+     */
+    required uint32 transaction_id = 2;
+
+    /*
+     * Result of file write transaction
+     */
+    optional T_OTAP_ResultCode result = 3 [default = OTAP_RESULT_CODE_OK];
+
+    optional T_OTAP_TransactionError transaction_error = 4  [default = OTAP_TRANSACTION_OK];
+}
+
+/*
+ * Activate File request
+ * eg. Apply firmware update, apply config, etc
+ */
+message T_OTAP_ActivateFileReq
+{
+    /* Request ID, echoed back in response */
+    required uint32 request_id = 1;
+
+    /*
+     * File name (null terminated) to activate
+     */
+    required string file_name = 2 [(nanopb).max_size = 50];
+
+    /*
+     * Optional time at which to activate, absolute time in UTC seconds
+     * (0 means activate immediately)
+     */
+    optional int64 activation_time = 3 [default = 0];
+
+    /*
+     * Additional files to activate
+     */
+    repeated string additional_files = 4 [(nanopb).max_size = 50, (nanopb).max_count = 3];
+}
+
+/*
+ * Error codes when file activation fails
+ */
+enum T_OTAP_ActivationError
+{
+    /* Prevent nanopb from creating very long names for enum items */
+    option (nanopb_enumopt).long_names = false;
+
+    OTAP_ACTIVATION_SUCCESS                     = 0;
+    OTAP_ACTIVATION_TOO_MANY_IN_PROGRESS        = 1;
+    OTAP_ACTIVATION_NO_FREE_SCHEDULER_ENTRIES   = 2;
+}
+
+/*
+ * Activate File response
+ */
+message T_OTAP_ActivateFileRsp
+{
+    /* Request ID, echoed back from request */
+    required uint32 request_id = 1;
+
+    /*
+     * Result of handling file activation request
+     */
+    optional T_OTAP_ResultCode result = 2 [default = OTAP_RESULT_CODE_OK];
+
+    /*
+     * Specific error code if activation request failed (result OTAP_RESULT_CODE_FAILED)
+     */
+    optional T_OTAP_ActivationError activation_error = 3 [default = OTAP_ACTIVATION_SUCCESS];
+}
+
+/*********************************************************************************************
+
+   FILE DELETE
+
+ *********************************************************************************************/
+
+/*
+ * Delete a file
+ */
+message T_OTAP_FileDeleteReq
+{
+    /* ID of request */
+    optional uint32 request_id = 1;
+
+    /* Name of file to delete */
+    optional string file_name = 2 [(nanopb).max_size = 50];
+}
+
+/*
+ * File delete response
+ */
+message T_OTAP_FileDeleteRsp
+{
+    /* ID of request this response relates to */
+    optional uint32 request_id = 1;
+
+    /* Delete result code */
+    optional T_OTAP_ResultCode result = 2 [default = OTAP_RESULT_CODE_OK];
+}
+
+/*********************************************************************************************
+
+   FILE READ
+
+ *********************************************************************************************/
+
+/*
+ * File Read Request
+ */
+message T_OTAP_FileReadReq
+{
+    /* ID of request */
+    optional uint32 request_id = 1;
+
+    /* Name of file to read (null terminated) */
+    required string file_name = 2 [(nanopb).max_size = 50];
+}
+
+/*
+ * File Read Response
+ */
+message T_OTAP_FileReadRsp
+{
+    /* ID of request this response relates to */
+    optional uint32 request_id = 1;
+
+    /*
+     * Result code
+     */
+    optional T_OTAP_ResultCode result = 2 [default = OTAP_RESULT_CODE_OK];
+
+    /*
+     * File size
+     */
+    optional uint32 file_size = 3;
+
+    /*
+     * File CRC32, to validate file after read complete
+     */
+    optional uint32 file_crc = 4;  
+}
+
+/*
+ * File Read Block
+ */
+message T_OTAP_FileReadBlock
+{
+    /* ID of request this read relates to */
+    optional uint32 request_id = 1;
+
+    /* Read offset - ie offset in file of this data chunk */
+    required uint32 read_offset = 2;
+
+    /* File data chunk */
+    required bytes data = 3 [(nanopb).max_size = 1024];
+}
+
+
+/*********************************************************************************************
+
+   LOG DATA UPLOAD
+
+ *********************************************************************************************/
+
+/*
+ * Query submessage
+ */
+message T_OTAP_Query
+{
+    /* Query ID */
+    required uint32 query_id = 1;
+
+    /* Time from which to read logged data */
+    optional int64 start_time_ms = 2;
+
+    /* Time up to which to read logged data */
+    optional int64 end_time_ms = 3;
+
+    /* ... There may be other query options, eg record types ... */
+}
+
+/*
+ * Log Read Request.
+ *
+ * Contains a query, and will result in Proteus sending
+ * first a LogReadRsp with an initial result, then
+ * (in the success case) a series of LogDataInd messages.
+ */
+message T_OTAP_LogReadReq
+{
+    /* Virtual log name (null terminated) */
+    required string log_name = 1 [(nanopb).max_size = 17];
+
+    /* Query - TODO handle repeated? */
+    optional T_OTAP_Query query = 2;
+}
+
+/*
+ * Initial response to a LogReadReq
+ */
+message T_OTAP_LogReadRsp
+{
+    /* ID of query this is in response to */
+    required uint32 query_id = 1;
+
+    /* Result code */
+    required T_OTAP_ResultCode result = 2;
+}
+
+/*
+ * Log Data Indication
+ */
+message T_OTAP_LogDataInd
+{
+    /*
+     * ID of query this indication corresponds to.
+     * Optional, might send a log record unrequested (eg alarm)?
+     */
+    optional uint32 query_id = 1;
+
+    /*
+     * Byte sequence containing requested log data
+     */
+    required bytes data = 2 [(nanopb).max_size = 1024];
+
+    /*
+     * Final block flag - TRUE if no more blocks follow.
+     * May be used as an indication that Proteus has completed processing of the associated
+     * request, and another request may now be issued.
+     */
+    optional bool final = 3 [default = false];
+}
+
+
+/*********************************************************************************************
+
+   POINT READS
+   (MMI mainly, may be used OTA)
+
+ *********************************************************************************************/
+
+/*
+ * Read request / response type
+ */
+enum T_OTAP_PointType {
+
+    /* Prevent nanopb from creating very long names for enum items */
+    option (nanopb_enumopt).long_names = false;
+
+    POINT_TYPE_ANALOGUE   = 0;    /* Read request for an analogue type */
+    POINT_TYPE_BINARY     = 1;    /* Read request for a binary type */
+    POINT_TYPE_COUNTER    = 2;    /* Read request for a counter type */
+}
+
+/*
+ * Point definitions
+ */
+enum T_OTAP_POINT_NO {
+
+    /* Prevent nanopb from creating very long names for enum items */
+    option (nanopb_enumopt).long_names = false;
+
+    POINT_NO_INVALID = 0;
+    /*
+     * Point numbers for Pressure, analogue
+     */
+    POINT_NO_P1 = 1;
+    POINT_NO_P2 = 2;
+    POINT_NO_P3 = 3;
+
+    /* Expansion range */
+
+    /*
+     * Point numbers for Temperature, analogue
+     */
+    POINT_NO_T0 = 256; /* Internal MCU temperature */
+    POINT_NO_T1 = 257; /* Temperature at P1 sensor */
+    POINT_NO_T2 = 258;
+    POINT_NO_T3 = 259;
+
+
+    /*
+     *  Point numbers for voltage, analouge
+     */
+    POINT_NO_VINT_SOURCE_BATTERY1 = 512;
+    POINT_NO_VINT_SOURCE_BATTERY2    = 513;
+    POINT_NO_VINT_SOURCE_EXTERNAL = 514;
+    POINT_NO_VINT_SOURCE_SUPERCAP = 515;
+    POINT_NO_VEXT                 = 516;
+
+    /*
+     * Point Numbers for flow.
+     */
+    POINT_NO_F1 = 768; /* 1st flow channel */
+
+
+    /* ... etc ... */
+}
+
+/*
+ * Read request for device data
+ */
+message T_OTAP_ReadPointReq
+{
+    /* Query ID */
+    optional uint32 request_id = 1;
+
+    /* Point type */
+    required T_OTAP_PointType point_type = 2;
+
+    /* Point number */
+    required T_OTAP_POINT_NO point_number = 3;
+}
+
+/*
+ * Read response for device data
+ */
+message T_OTAP_ReadPointRsp
+{
+    /* Query ID */
+    optional uint32 request_id = 1;
+
+    /* Point type */
+    required T_OTAP_PointType point_type = 2;
+
+    /* Point number */
+    required T_OTAP_POINT_NO point_number = 3;
+
+    /* Result code */
+    optional T_OTAP_ResultCode result = 4 [default = OTAP_RESULT_CODE_OK];
+
+    /* Value for analogue point read */
+    optional float analogue_point_value = 5;
+
+    /* Value for binary point read */
+    optional bool binary_point_value = 6;
+
+    /* Value for counter point read */
+    optional sint64 counter_point_value = 7;
+}
+
+/*
+ * Triggers an OTA GSM connection from the MMI or other source
+ */
+ message T_OTAP_TriggerConnection
+{
+    required E_OTAP_CONNECT_TRIGGER connection_trigger = 1 [default = E_OTAP_CONNECT_TRIGGER_MMI];
+}
+
+/*********************************************************************************************
+
+   GSM Status
+   (Used by MMI mainly, does not make sense to use over OTA)
+
+ *********************************************************************************************/
+/*
+* Codes mapping to connection state to server
+*/
+enum T_OTAP_ConnectionEvent
+{
+    /* Prevent nanopb from creating very long names for enum items */
+    option (nanopb_enumopt).long_names = false;
+
+    OTAP_CONNECTION_EVENT_DISCONNECTED           = 0; /* Device has disconnected from server */
+
+    OTAP_CONNECTION_EVENT_GSM_POWER_ON_OK      = 1;
+    OTAP_CONNECTION_EVENT_GSM_POWER_ON_FAILED  = 2;
+
+    OTAP_CONNECTION_EVENT_GSM_REGISTERED         = 3;
+    OTAP_CONNECTION_EVENT_GSM_DEREGISTERED       = 4;
+
+    OTAP_CONNECTION_EVENT_GPRS_REGISTERED        = 5;
+    OTAP_CONNECTION_EVENT_GPRS_DEREGISTERED      = 6;
+
+
+    OTAP_CONNECTION_EVENT_GPRS_ATTACHED          = 7;
+
+    OTAP_CONNECTION_EVENT_PDP_CONTEXT_ACTIVATED  = 8; /* PDP context activated for accessing GPRS */
+
+    OTAP_CONNECTION_EVENT_TIME_SYNCHRONIZED      = 9; /* Synchronized with NTP server
+                                                       * NOTE This might not happen on every connection attempt
+                                                       * as it takes upto 10s to complete
+                                                       */
+
+    OTAP_CONNECTION_EVENT_SOCKET_CONNECTED       = 10; /* TCP socket opened with MQTT server */
+
+    OTAP_CONNECTION_EVENT_MQTT_CONNECTED         = 11; /* Connection established with MQTT broker */
+
+    OTAP_CONNECTION_EVENT_COMMS_CONNECTED        = 12; /* Device has begun OTAP communications via MQTT */
+}
+
+
+/*
+* CONNECT IND message - sent by Proteus to MMI reporting state of current connection to Anapos.
+*/
+message T_OTAP_ConnectInd
+{
+    required T_OTAP_ConnectionEvent status = 1;
+}
+
+
+/*********************************************************************************************
+
+   GSM Signal strength
+
+
+ *********************************************************************************************/
+
+enum T_OTAP_RxSignalStrengthStatus
+{
+    /* Prevent nanopb from creating very long names for enum items */
+    option (nanopb_enumopt).long_names = false;
+
+    OTAP_RX_SIGNAL_STRENGTH_INVALID    = 0; /* We have no reading to provide */
+    OTAP_RX_SIGNAL_STRENGTH_HISTORICAL = 1; /* Reading from previous GSM connection */
+    OTAP_RX_SIGNAL_STRENGTH_SESSION    = 2; /* Reading from start of current session */
+    OTAP_RX_SIGNAL_STRENGTH_LIVE       = 3; /* Live polled reading from current session */
+}
+
+message T_OTAP_RxSignalStrengthReq
+{
+    /* Request ID, echoed back in response */
+    required uint32 request_id = 1;
+}
+
+message T_OTAP_RxSignalStrengthRsp
+{
+    /* Request ID, echoed back from request */
+    required uint32 request_id = 1;
+
+    /* Status of request */
+    required T_OTAP_RxSignalStrengthStatus status = 2;
+
+    /* Rx Signal strength value */
+    optional sint32 signal_strength = 3 [default = 0];
+
+    /* Carrier name we are currently registered on */
+    optional string carrier = 4 [(nanopb).max_size = 24];
+}
+
+
+/*********************************************************************************************
+
+   Reset Proteus command
+
+
+ *********************************************************************************************/
+
+enum T_OTAP_ResetType
+{
+    /* Prevent nanopb from creating very long names for enum items */
+    option (nanopb_enumopt).long_names = false;
+
+    OTAP_RESET_TYPE_CONTROLLED    = 0; /* Clean shutdown and reset */
+    OTAP_RESET_TYPE_HARD_FAULT    = 1; /* Generate a hard fault, system test use only */
+    OTAP_RESET_TYPE_ASSERT        = 2; /* Reset with a failed assert, system test use only */
+    OTAP_RESET_TYPE_WATCHDOG      = 3; /* Generate a watchdog reset, system test use only */
+    OTAP_RESET_TYPE_DEADLOCK      = 4; /* Generate a deadlock reset, system test use only */
+}
+
+message T_OTAP_ResetCmd
+{
+    optional T_OTAP_ResetType reset_type = 1 [default = OTAP_RESET_TYPE_CONTROLLED];
+}
+
+/*********************************************************************************************
+
+   Service Mode command
+
+
+ *********************************************************************************************/
+
+enum T_OTAP_ServiceMode
+{
+    /* Prevent nanopb from creating very long names for enum items */
+    option (nanopb_enumopt).long_names = false;
+
+    OTAP_SERVICE_MODE_LEAVE    = 0; /* Leave Service Mode */
+    OTAP_SERVICE_MODE_ENTER    = 1; /* Enter Service Mode */
+}
+
+message T_OTAP_ServiceModeReq
+{
+    optional T_OTAP_ServiceMode service_mode = 1 [default = OTAP_SERVICE_MODE_LEAVE];
+}
+
+/*********************************************************************************************
+
+   Service mode Response
+
+
+ *********************************************************************************************/
+
+message T_OTAP_ServiceModeRsp
+{
+    /* This is currently empty but could be expanded if needed */
+}
+
+/*********************************************************************************************
+
+   Decommission command
+
+
+ *********************************************************************************************/
+
+message T_OTAP_DecommissionReq
+{
+    /* This is currently empty but could be expanded if needed */
+}
+
+/*********************************************************************************************
+
+   Decommission response
+
+
+ *********************************************************************************************/
+
+message T_OTAP_DecommissionRsp
+{
+    /* This is currently empty but could be expanded if needed */
+}
+
+/*********************************************************************************************
+
+   Disconnect Command
+
+
+ *********************************************************************************************/
+
+message T_OTAP_DisconnectCmd
+{
+    /* This is currently empty but could be expanded if needed */
+}
+
+
+/*********************************************************************************************
+
+   Get Diagnostics Info Request/Response
+   
+   
+ *********************************************************************************************/
+
+/* Request diagnostics info */
+message T_OTAP_GetDiagnosticsInfoReq
+{
+    /* Identifies which specific diagnostics info to get (see T_DIAG_MessageType in DiagnosticTypes.proto) */
+    required uint32 info_type    = 1;
+    
+    /* Request ID, echoed back in response */
+    optional uint32 request_id   = 2  [default = 0];    
+}
+
+/* Diagnostics info response */
+message T_OTAP_GetDiagnosticsInfoRsp
+{
+    /* Identifies which diagnostics info is returned (see T_DIAG_MessageType in DiagnosticTypes.proto) */
+    required uint32 info_type               = 1;
+
+    /* Request ID, echoed back from request */
+    optional uint32            request_id   = 2 [default = 0];    
+ 
+    /* Was the get successful ? */
+    optional T_OTAP_ResultCode result       = 3 [default = OTAP_RESULT_CODE_OK];
+    
+    /* If get successful, the diagnostics info data (as a protocol buffer corresponding to the metrics_type in DiagnosticTypes.proto) */
+    optional bytes             data         = 4 [(nanopb).max_size = 1024];
+}
+
+/*
+ *******************************************************************************************
+   MESSAGE TYPES
+   (Used internally by Proteus to identify messages)
+
+ *********************************************************************************************/
+
+/*
+ *******************************************************************************************
+ * Note ANY CHANGES TO THIS ENUM MUST BE REFLECTED in the mapping table OTAP_MessageTable[]
+ * in ProtocolBufferEncodeDecode.c
+ *******************************************************************************************
+ */
+
+/* Enum definitions for the messages supported */
+enum T_OTAP_MessageType {
+
+    /* Prevent nanopb from creating very long names for enum items */
+    option (nanopb_enumopt).long_names = false;
+
+    OTAP_MESSAGE_TYPE_UNKNOWN                 = 0;
+    OTAP_MESSAGE_TYPE_ANNOUNCE                = 1;
+    OTAP_MESSAGE_TYPE_TRANSACTION_COMPLETE    = 2;
+    OTAP_MESSAGE_TYPE_FILE_WRITE_BLOCK        = 3;
+    OTAP_MESSAGE_TYPE_ACTIVATE_FILE_REQ       = 4;
+    OTAP_MESSAGE_TYPE_ACTIVATE_FILE_RSP       = 5;
+    OTAP_MESSAGE_TYPE_LOG_READ_REQ            = 6;
+    OTAP_MESSAGE_TYPE_LOG_READ_RSP            = 7;
+    OTAP_MESSAGE_TYPE_LOG_DATA_IND            = 8;
+    OTAP_MESSAGE_TYPE_READ_POINT_REQ          = 9;
+    OTAP_MESSAGE_TYPE_READ_POINT_RSP          = 10;
+    OTAP_MESSAGE_TYPE_TRIGGER_CONNECTION      = 11;
+    OTAP_MESSAGE_TYPE_CONNECTION_EVENT        = 12;
+    OTAP_MESSAGE_TYPE_RSS_REQ                 = 13;
+    OTAP_MESSAGE_TYPE_RSS_RSP                 = 14;
+    OTAP_MESSAGE_TYPE_RESET_CMD               = 15;
+    OTAP_MESSAGE_TYPE_SERVICE_MODE_REQ        = 16;
+    OTAP_MESSAGE_TYPE_SERVICE_MODE_RSP        = 17;
+    OTAP_MESSAGE_TYPE_DECOMMISSION_REQ        = 18;
+    OTAP_MESSAGE_TYPE_DECOMMISSION_RSP        = 19;
+    OTAP_MESSAGE_TYPE_DISCONNECT_CMD          = 20;
+    OTAP_MESSAGE_TYPE_GET_DIAGNOSTICS_INFO_REQ = 21;
+    OTAP_MESSAGE_TYPE_GET_DIAGNOSTICS_INFO_RSP = 22;    
+    OTAP_MESSAGE_TYPE_FILE_DELETE_REQ         = 23;
+    OTAP_MESSAGE_TYPE_FILE_DELETE_RSP         = 24;
+    OTAP_MESSAGE_TYPE_FILE_READ_REQ           = 25;
+    OTAP_MESSAGE_TYPE_FILE_READ_RSP           = 26;
+    OTAP_MESSAGE_TYPE_FILE_READ_BLOCK         = 27;
+}

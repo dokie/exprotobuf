@@ -1,0 +1,244 @@
+/**
+ * @file LogaDataTypes.proto
+ *
+ * (C)opyright 2013 i2O Water Ltd
+ *
+ * @section DESCRIPTION
+ *
+ * Protocol Buffer descriptions for Logging data
+ *
+ * @addtogroup Protobuf
+ * @{
+ *
+ */
+
+import "nanopb.proto";
+import "Proteus.proto";
+
+/*
+ * >>>>> KEEP ENUMS WITH TYPE <<<<<
+ */
+
+/**
+ * @note Update E_LOG_DATA_TYPE_NUM define (in EncodeLogData.c) if adding new entries here
+ */
+enum E_LOG_DATA_TYPE {
+    UNKNOWN                          = 0;
+    FILTERED_ANALOGUE_CHANNEL        = 1;  /**< Indicates its a T_FilteredAnalogChannel */
+    ACTIVATE_FILE_RESET              = 2;  /**< Indicates its a T_ActivateFileReset */
+    ASSERT_FAILED                    = 3;  /**< Indicates its a T_AssertFailed */
+    SERVING_CELL_INFO                = 4;  /**< GSM Serving Cell Information */
+    POWER_SOURCE_IN_USE              = 5;  /**< Indicates its a T_PowerSourceInUse */
+    ALARM_EVENT                      = 6;
+    POWER_SOURCE_VOLTAGE_MEASUREMENT = 7;  /**< Indicates its a T_PowerSourceVoltageMeasurement */
+    RESET_CAUSE                      = 8;  /**< Reason for last CPU reset */
+    GSM_CONNECTION_ATTEMPT           = 9;  /**< Logs a GSM connection attempt */
+    GSM_MODEM_ON                     = 10; /**< Logs when modem switched on */
+    GSM_MODEM_OFF                    = 11; /**< Logs when modem switched off */
+    GSM_ERROR                        = 12; /**< Logs if we have a GSM Error */
+    SERVICE_MODE                     = 13; /**< Logs Entering and exiting Service Mode */
+    SYSTEM_ERROR                     = 14; /**< Logs a system error */
+    TIME_SYNC                        = 15; /**< Time synchronisation event log */
+}
+
+/* The T_LogDataHeader now lives in EncodeLogData.h. It was moved there
+ * because protobufs do not support UINT16 types and this is needed for
+ * the type. Its structure is as follows.
+ * UINT16       type;        The type of the data
+ * UINT32       length;      The encoded length
+ */
+
+
+/** Filtered FLOAT32 output structure */
+message T_FilteredAnalogueChannel {
+    required E_ANALOGUE_CHANNEL_ID  channel_id             = 1;
+
+    optional float                  value                  = 2;
+    optional float                  min                    = 3;
+    optional float                  max                    = 4;
+    optional float                  sum_of_squares         = 5;
+
+    required uint32                 timestamp_first_s      = 6;
+    optional uint32                 timestamp_last_delta_s = 7;
+    optional uint32                 timestamp_min_delta_s  = 8;
+    optional uint32                 timestamp_max_delta_s  = 9;
+    optional uint32                 invalid_samples        = 10;
+    optional uint32                 sample_counter         = 11;
+}
+
+
+/** Indicates Proteus device reset to activate an executable */
+message T_ActivateFileReset {
+    required uint32     timestamp_s         = 1;
+    required string     executable_name     = 2 [(nanopb).max_size = 24];   /**< Name of executable to be run (null terminated) */
+    required uint32     partition_number    = 3;                            /**< Partition number containing the executable */
+}
+
+/** Indicates that the device has experienced a software assertion */
+message T_AssertFailed {
+    required uint64     timestamp   = 1;
+    /* Size of the message itself MUST match the size of the
+       variable we've allocated for it */
+    required string     message     = 2 [(nanopb).max_size = 128];
+}
+
+/** GSM Serving Cell information */
+message T_ServingCellInfo {
+    required uint64     timestamp   = 1;
+    optional sint32     dBM         = 2;
+    optional string     net_name    = 3 [(nanopb).max_size = 24];
+    optional string     net_code    = 4 [(nanopb).max_size = 7];
+    optional uint32     BSIC        = 5;
+    optional uint32     LAC         = 6;
+    optional uint32     CID         = 7;
+}
+
+/*
+ * Power source in use log entry
+ */
+
+/** Proteus Device power sources */
+/** (Values chosen to match ID0, ID1 GPIO pins) */
+enum T_PSM_PowerSource {
+    /* Prevent nanopb from creating very long names for enum items */
+    option (nanopb_enumopt).long_names = false;
+
+    PSM_POWER_SOURCE_SUPERCAP      = 0;  /**< No power source available, so running off super capacitor */
+    PSM_POWER_SOURCE_BATTERY_1     = 1;  /**< Battery pack 1 in use */
+    PSM_POWER_SOURCE_BATTERY_2     = 2;  /**< Battery pack 2 in use */
+    PSM_POWER_SOURCE_EXTERNAL      = 3;  /**< External power source in use */
+    PSM_POWER_SOURCE_UNKNOWN       = 4;  /**< Could not determine power source in use */
+}
+
+/** Indicates the Proteus device is using a particular power source */
+message T_PowerSourceInUse {
+    required uint32            timestamp_secs    = 1;   /**< Time of change to using the given power source (UTC in secs to save space) */
+    required T_PSM_PowerSource power_source      = 2;   /**< The power source now in use */
+}
+
+
+/** Alarm event */
+message T_AlarmEvent {
+    required uint32                 timestamp_s = 1;  /** Time of this alarm */
+    required E_ALARM_ID             alarm_id    = 2;  /** ID of this alarm */
+    required bool                   state       = 3;  /** State of this alarm (set/clear) */
+    optional E_ANALOGUE_CHANNEL_ID  channel_id  = 4 [default = E_ANALOGUE_CHANNEL_ID_NONE];  /** Channel associated with alarm */
+    optional float                  value       = 5;  /** Value that triggered this alarm */
+}
+
+/*
+ * Power source voltage measurement log entry
+ */
+
+/** Identifies which power source voltage measurement */
+enum T_PSM_Voltage {
+    /* Prevent nanopb from creating very long names for enum items */
+    option (nanopb_enumopt).long_names = false;
+
+    PSM_VOLTAGE_EXTERNAL      = 0;  /**< External power source voltage */
+    PSM_VOLTAGE_INTERNAL      = 1;  /**< Internal voltage of the power source in use */
+}
+
+/** Power source voltage measurement */
+message T_PowerSourceVoltageMeasurement {
+    required T_PSM_Voltage     voltage = 1;            /**< Which power source voltage measurement */
+    required float             value   = 2;            /**< The voltage value */
+    required uint32            timestamp_secs = 3;     /**< Time of measurement (UTC in secs to save space) */
+    optional T_PSM_PowerSource power_source_in_use = 4 [default = PSM_POWER_SOURCE_SUPERCAP]; /**< For PSM_VOLTAGE_INTERNAL measurement, gives the power source in use */
+    optional bool              measurement_due_to_gsm_activity = 5 [default = false]; /**< For PSM_VOLTAGE_INTERNAL measurement, indicates if measurement was due to GSM activity */
+}
+
+/****************************************************************************
+ * Target System Diagnostics
+ */
+
+/* NOTE If you change this structure you MUST change T_TARGET_ResetInfo in DiagnosticTypes.proto to be the same */
+message T_TARGET_ResetInfoLog {
+    required uint32 timestamp_s                               = 1; /**< Timestamp of reset */
+    required uint32 last_reset_cause                          = 2; /**< The reset cause */
+    required uint32 reset_counter                             = 3; /**< Number of times we have reset */
+    required uint32 last_fault_program_counter                = 4; /**< Program counter where reset occured */
+    required uint32 last_fault_subroutine_call_return_address = 5; /**< Return address on the stack */
+}
+
+/****************************************************************************
+ * GSM Connection attempt info
+ */
+
+message T_GSM_ConnectionAttemptLog {
+    required uint32 timestamp_s  = 1; /**< Timestamp of connection attempt */
+    required E_OTAP_CONNECT_TRIGGER trigger = 2; /**< Reason connection was triggered */
+}
+
+
+message T_GSM_ModemOnLog {
+    required uint32 timestamp_s  = 1; /**< Timestamp of connection */
+}
+
+message T_GSM_ModemOffLog {
+    required uint32 timestamp_s  = 1; /**< Timestamp of connection */
+    required uint32 on_time  = 2;     /**< How long has the modem been on */
+}
+
+enum T_GSM_Error {
+    /* Prevent nanopb from creating very long names for enum items */
+    option (nanopb_enumopt).long_names = false;
+
+    /* GSM_ERROR_NONE has to be 0 because some structures are initialised
+     * to 0.
+     */
+
+    GSM_ERROR_NONE                      = 0;
+    GSM_ERROR_SEND_PIN                  = 1;
+    GSM_ERROR_QUERY_PIN                 = 2;
+    GSM_ERROR_OPEN_MUX                  = 3;
+    GSM_ERROR_ENTER_MUX                 = 4;
+    GSM_ERROR_REGISTRATION              = 5;
+    GSM_ERROR_CLOSE_SESSION             = 6;
+    GSM_ERROR_PDP_CONTEXT_ACTIVATION    = 7;
+    GSM_ERROR_TIME_SYNC                 = 8;
+    GSM_ERROR_CONNECTION                = 9;
+    GSM_ERROR_GPRS_ATTACH               = 10;
+    GSM_ERROR_CONNECTION_FAILED         = 11;
+    GSM_ERROR_GPRS_REGISTRATION_FAILED  = 12;
+    GSM_ERROR_GPRS_CONNECTION_LOST      = 13;
+    GSM_ERROR_GPRS_DEGREGISTERED_WHILE_CONNECTED = 14;
+    GSM_ERROR_REGISTRATION_TIMEOUT      = 15;
+    GSM_ERROR_LOST_REGISTRATION         = 16;
+}
+
+message T_GSM_ErrorLog {
+    required uint32 timestamp_s  = 1; /**< Timestamp of error */
+    required T_GSM_Error error   = 2;
+}
+
+message T_ServiceModeLog {
+    required uint32 timestamp_s = 1; /**< Timestamp of mode change */
+    required bool mode  = 2;         /**< Service mode True if active else False */
+}
+
+/** Identifies specific system error */
+enum T_SystemError {
+    /* Prevent nanopb from creating very long names for enum items */
+    option (nanopb_enumopt).long_names = false;
+
+    SYSTEM_ERROR_SCHEDULER_EVENT_CREATE_FAIL    =  1;   /**< Failed to allocate a scheduler entry */
+    SYSTEM_ERROR_NTP_TIME_OUT_OF_RANGE          =  2;   /**< NTP query returned time out of range */
+}
+
+/** Type for system error log entries */
+message T_SystemErrorLog {
+    required uint32             timestamp_s = 1;    /**< Time the error happened */
+    required T_SystemError      error       = 2;    /**< Error being logged */
+    optional uint32             info        = 3;    /**< Optional extra info */
+}
+
+/** Type for time synchronisation log entries */
+message T_TimeSyncLog {
+    required uint32   timestamp_s = 1;  /*< Time at which sync happened (logged post-sync *) */
+    required sint32   delta_s     = 2;  /*< Current time - Old time (in seconds) */
+}
+
+/**
+ * @}
+ */

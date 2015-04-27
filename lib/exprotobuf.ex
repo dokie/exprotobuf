@@ -31,7 +31,7 @@ defmodule Protobuf do
         end
     end
 
-    config |> parse |> Builder.define(config)
+    config |> parse([use_packages: false]) |> Builder.define(config)
   end
 
   # Read the file passed to :from
@@ -57,8 +57,8 @@ defmodule Protobuf do
   end
 
   # Parse and fix namespaces of parsed types
-  defp parse(%Config{namespace: ns, schema: schema, inject: inject}) do
-    Parser.parse!(schema) |> namespace_types(ns, inject)
+  defp parse(%Config{namespace: ns, schema: schema, inject: inject}, opts \\ []) do
+    Parser.parse!(schema, opts) |> namespace_types(ns, inject)
   end
 
   # Apply namespace to top-level types
