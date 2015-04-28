@@ -1,6 +1,8 @@
 defmodule ProtobufTest do
   use Protobuf.Case
 
+  require Logger
+
   test "define records in namespace" do
     mod = def_proto_module "
        message Msg1 {
@@ -101,11 +103,14 @@ defmodule ProtobufTest do
   end
 
   test "support complex structured files with imports and extensions and options" do
-    defmodule ComplexProto do
-      use Protobuf, from: Path.expand("./proto/nanopb.proto", __DIR__)
+    defmodule Proteus do
+      #use Protobuf, from: Path.expand("./proto/OTAP_Messages.proto", __DIR__)
+      #use Protobuf, from: Path.expand("./proto/ConfigTypes.proto", __DIR__)
+      use Protobuf, from: Path.expand("./proto/LogDataTypes.proto", __DIR__)
     end
 
-    fdp = ComplexProto.FileDescriptorProto.new
+    message = Proteus.T_FilteredAnalogueChannel.new
+    Logger.debug ["#{inspect message}"]
   end
 
   test "define a method to get proto defs" do

@@ -21,8 +21,6 @@
  * @{
  */
 
-
-import "nanopb.proto";
 import "Proteus.proto";
 
 /*******************************************
@@ -68,8 +66,6 @@ import "Proteus.proto";
  * Console store instance
  */
 enum E_DB_CONSOLE_STORE {
-    option (nanopb_enumopt).long_names = false;
-
     E_DB_CONSOLE_STORE_1 = 0;
     E_DB_CONSOLE_STORE_2 = 1;
 }
@@ -78,8 +74,6 @@ enum E_DB_CONSOLE_STORE {
  * Acquisition Service driver identifier
  */
 enum E_ACQ_DRIVER_ID {
-    option (nanopb_enumopt).long_names = false;
-
     E_ACQ_DRIVER_ID_ADC  = 0;     /**< Analogue to Digital Converter */
     E_ACQ_DRIVER_ID_IT   = 1;     /**< Integrated Transducer */
     E_ACQ_DRIVER_ID_PSM  = 2;     /**< Power Source Monitor */
@@ -90,8 +84,6 @@ enum E_ACQ_DRIVER_ID {
  * Type of scheduled event (absolute/relative)
  */
 enum E_SCHED_EVENT_TYPE {
-    option (nanopb_enumopt).long_names = false;
-
     E_SCHED_EVENT_TYPE_NONE     = 0;     /**< No event (delete) */
     E_SCHED_EVENT_TYPE_ABSOLUTE = 1;     /**< Absolute event time (triggers at a set clock time) */
     E_SCHED_EVENT_TYPE_RELATIVE = 2;     /**< Relative event time (triggers at a set time from now) */
@@ -101,8 +93,6 @@ enum E_SCHED_EVENT_TYPE {
  * Transport Manager session type
  */
 enum E_TMAN_SESSION_TYPE {
-    option (nanopb_enumopt).long_names = false;
-
     E_TMAN_SESSION_TYPE_NONE         = 0;     /**< No/invalid session type */
     E_TMAN_SESSION_TYPE_TCPIP        = 1;     /**< TCPIP Session */
     E_TMAN_SESSION_TYPE_LOOPBACK     = 2;     /**< Loopback session (for test) */
@@ -112,8 +102,6 @@ enum E_TMAN_SESSION_TYPE {
 }
 
 enum E_T_TEST_USERNAMETYPE {
-    option (nanopb_enumopt).long_names = false;
-
     E_T_TEST_USERNAMETYPE_LONG_NAME  = 0;
     E_T_TEST_USERNAMETYPE_SHORT_NAME = 1;
     E_T_TEST_USERNAMETYPE_NICK_NAME  = 2;
@@ -123,8 +111,6 @@ enum E_T_TEST_USERNAMETYPE {
  * Flash store instance
  */
 enum E_DB_FLASH_STORE {
-    option (nanopb_enumopt).long_names = false;
-
     E_DB_FLASH_STORE_1 = 0;
     E_DB_FLASH_STORE_2 = 1;
     E_DB_FLASH_STORE_3 = 2;
@@ -134,8 +120,6 @@ enum E_DB_FLASH_STORE {
  * Identifier for a filter block type (mean filter block etc)
  */
 enum E_FILTER_BLOCK_TYPE {
-    option (nanopb_enumopt).long_names = false;
-
     E_FILTER_BLOCK_TYPE_NONE         = 0;     /**< No filter block */
     E_FILTER_BLOCK_TYPE_MEAN         = 1;     /**< Mean filter block */
     E_FILTER_BLOCK_TYPE_ALARM        = 2;     /**< Alarm filter block */
@@ -146,14 +130,10 @@ enum E_FILTER_BLOCK_TYPE {
  * Action for the "Send Message" filter block
  */
 enum E_SEND_MESSAGE_ACTION {
-    option (nanopb_enumopt).long_names = false;
-
     E_SEND_MESSAGE_ACTION_LOG = 0;     /**< Log value */
 }
 
 enum E_TEST_STORAGE_METHOD {
-    option (nanopb_enumopt).long_names = false;
-
     E_TEST_STORAGE_METHOD_NONE    = 0;
     E_TEST_STORAGE_METHOD_CONSOLE = 1;
 }
@@ -162,8 +142,6 @@ enum E_TEST_STORAGE_METHOD {
  * Transport protocol identifier
  */
 enum E_TRANSPORT_PROTOCOL_ID {
-    option (nanopb_enumopt).long_names = false;
-
     E_TRANSPORT_PROTOCOL_ID_MQTT  = 0;     /**< Message Queue Telemetry Transport protocol */
     E_TRANSPORT_PROTOCOL_ID_TCPIP = 1;     /**< TCP/IP protocol */
     E_TRANSPORT_PROTOCOL_ID_UART  = 2;     /**< UART protocol */
@@ -173,8 +151,6 @@ enum E_TRANSPORT_PROTOCOL_ID {
  * Diagnostic level (currently just ON/OFF)
  */
 enum E_DIAG_LEVEL {
-    option (nanopb_enumopt).long_names = false;
-
     E_DIAG_LEVEL_OFF     = 0;     /**< Diagnostics off */
     E_DIAG_LEVEL_ERROR   = 1;     /**< Diagnostics level error */
     E_DIAG_LEVEL_WARNING = 2;     /**< Diagnostics level warning */
@@ -186,8 +162,6 @@ enum E_DIAG_LEVEL {
  * Database storage method
  */
 enum E_DB_STORAGE_METHOD {
-    option (nanopb_enumopt).long_names = false;
-
     E_DB_STORAGE_METHOD_NONE    = 0;
     E_DB_STORAGE_METHOD_CONSOLE = 1;
     E_DB_STORAGE_METHOD_FLASH   = 2;
@@ -200,8 +174,6 @@ enum E_DB_STORAGE_METHOD {
 
 enum E_CONFIG_MessageID
 {
-    option (nanopb_enumopt).long_names = false;
-
     E_CONFIG_MESSAGE_ID_M_CONFIG_FILTERSERVICEDIAGNOSTICS = 100;
     E_CONFIG_MESSAGE_ID_M_CONFIG_FILTERBLOCK = 101;
     E_CONFIG_MESSAGE_ID_M_CONFIG_CONFIGURATIONSERVICEDIAGNOSTICS = 200;
@@ -345,7 +317,7 @@ message M_CONFIG_ConfigurationServiceDiagnostics {
  * Message ID = 201
  */
 message M_CONFIG_ConfigurationID {
-    required bytes id = 1 [(nanopb).max_size = 16]; // {MAX_CONFIG_ID_LEN = 16}
+    required bytes id = 1; // {MAX_CONFIG_ID_LEN = 16}
 }
 
 /*
@@ -403,7 +375,7 @@ message M_CONFIG_MQTTDiagnostics {
  * Message ID = 701
  */
 message M_CONFIG_MQTTBrokerInformation {
-    optional bytes  FQDN = 1 [(nanopb).max_size = 80]; // {MAX_FQDN_LEN = 80}
+    optional bytes  FQDN = 1; // {MAX_FQDN_LEN = 80}
     optional uint32 port = 2;
 }
 
@@ -412,8 +384,8 @@ message M_CONFIG_MQTTBrokerInformation {
  * Message ID = 702
  */
 message M_CONFIG_MQTTCredentials {
-    optional bytes username = 1 [(nanopb).max_size = 20]; // {MQTT_MAX_USERNAME_LEN = 20}
-    optional bytes password = 2 [(nanopb).max_size = 20]; // {MQTT_MAX_PASSWORD_LEN = 20}
+    optional bytes username = 1; // {MQTT_MAX_USERNAME_LEN = 20}
+    optional bytes password = 2; // {MQTT_MAX_PASSWORD_LEN = 20}
 }
 
 /*
@@ -458,9 +430,9 @@ message M_CONFIG_GSMDiagnostics {
  * Message ID = 901
  */
 message M_CONFIG_GSM_APN_Info {
-    required bytes address  = 1 [(nanopb).max_size = 64]; // {GSM_APN_MAX_LEN = 64}
-    required bytes username = 2 [(nanopb).max_size = 16]; // {GSM_USERNAME_MAX_LEN = 16}
-    required bytes password = 3 [(nanopb).max_size = 16]; // {GSM_PASSWORD_MAX_LEN = 16}
+    required bytes address  = 1; // {GSM_APN_MAX_LEN = 64}
+    required bytes username = 2; // {GSM_USERNAME_MAX_LEN = 16}
+    required bytes password = 3; // {GSM_PASSWORD_MAX_LEN = 16}
 }
 
 /*
@@ -468,7 +440,7 @@ message M_CONFIG_GSM_APN_Info {
  * Message ID = 902
  */
 message M_CONFIG_GSM_SIM_PIN {
-    required bytes pin = 1 [(nanopb).max_size = 8]; // {GSM_PIN_MAX_LEN = 8}
+    required bytes pin = 1; // {GSM_PIN_MAX_LEN = 8}
 }
 
 /*
@@ -476,7 +448,7 @@ message M_CONFIG_GSM_SIM_PIN {
  * Message ID = 903
  */
 message M_CONFIG_GSM_AlarmNotification {
-    optional string sms_no = 1 [(nanopb).max_size = 16]; // {ALARM_SMS_NO_MAX_LEN = 16}STRING
+    optional string sms_no = 1; // {ALARM_SMS_NO_MAX_LEN = 16}STRING
 }
 
 /*
@@ -617,8 +589,8 @@ message M_CONFIG_UARTProtocolDiagnostics {
  * Message ID = 2100
  */
 message M_CONFIG_LocationInformation {
-    required string location_name = 1 [(nanopb).max_size = 32]; // {LOCATION_NAME_MAX_LEN = 32}STRING
-    required string company_name  = 2 [(nanopb).max_size = 24]; // {COMPANY_NAME_MAX_LEN = 24}STRING
+    required string location_name = 1; // {LOCATION_NAME_MAX_LEN = 32}STRING
+    required string company_name  = 2; // {COMPANY_NAME_MAX_LEN = 24}STRING
 }
 
 

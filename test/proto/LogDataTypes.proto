@@ -12,7 +12,6 @@
  *
  */
 
-import "nanopb.proto";
 import "Proteus.proto";
 
 /*
@@ -70,7 +69,7 @@ message T_FilteredAnalogueChannel {
 /** Indicates Proteus device reset to activate an executable */
 message T_ActivateFileReset {
     required uint32     timestamp_s         = 1;
-    required string     executable_name     = 2 [(nanopb).max_size = 24];   /**< Name of executable to be run (null terminated) */
+    required string     executable_name     = 2;   /**< Name of executable to be run (null terminated) */
     required uint32     partition_number    = 3;                            /**< Partition number containing the executable */
 }
 
@@ -79,15 +78,15 @@ message T_AssertFailed {
     required uint64     timestamp   = 1;
     /* Size of the message itself MUST match the size of the
        variable we've allocated for it */
-    required string     message     = 2 [(nanopb).max_size = 128];
+    required string     message     = 2;
 }
 
 /** GSM Serving Cell information */
 message T_ServingCellInfo {
     required uint64     timestamp   = 1;
     optional sint32     dBM         = 2;
-    optional string     net_name    = 3 [(nanopb).max_size = 24];
-    optional string     net_code    = 4 [(nanopb).max_size = 7];
+    optional string     net_name    = 3;
+    optional string     net_code    = 4;
     optional uint32     BSIC        = 5;
     optional uint32     LAC         = 6;
     optional uint32     CID         = 7;
@@ -100,9 +99,6 @@ message T_ServingCellInfo {
 /** Proteus Device power sources */
 /** (Values chosen to match ID0, ID1 GPIO pins) */
 enum T_PSM_PowerSource {
-    /* Prevent nanopb from creating very long names for enum items */
-    option (nanopb_enumopt).long_names = false;
-
     PSM_POWER_SOURCE_SUPERCAP      = 0;  /**< No power source available, so running off super capacitor */
     PSM_POWER_SOURCE_BATTERY_1     = 1;  /**< Battery pack 1 in use */
     PSM_POWER_SOURCE_BATTERY_2     = 2;  /**< Battery pack 2 in use */
@@ -132,9 +128,6 @@ message T_AlarmEvent {
 
 /** Identifies which power source voltage measurement */
 enum T_PSM_Voltage {
-    /* Prevent nanopb from creating very long names for enum items */
-    option (nanopb_enumopt).long_names = false;
-
     PSM_VOLTAGE_EXTERNAL      = 0;  /**< External power source voltage */
     PSM_VOLTAGE_INTERNAL      = 1;  /**< Internal voltage of the power source in use */
 }
@@ -181,9 +174,6 @@ message T_GSM_ModemOffLog {
 }
 
 enum T_GSM_Error {
-    /* Prevent nanopb from creating very long names for enum items */
-    option (nanopb_enumopt).long_names = false;
-
     /* GSM_ERROR_NONE has to be 0 because some structures are initialised
      * to 0.
      */
@@ -219,9 +209,6 @@ message T_ServiceModeLog {
 
 /** Identifies specific system error */
 enum T_SystemError {
-    /* Prevent nanopb from creating very long names for enum items */
-    option (nanopb_enumopt).long_names = false;
-
     SYSTEM_ERROR_SCHEDULER_EVENT_CREATE_FAIL    =  1;   /**< Failed to allocate a scheduler entry */
     SYSTEM_ERROR_NTP_TIME_OUT_OF_RANGE          =  2;   /**< NTP query returned time out of range */
 }

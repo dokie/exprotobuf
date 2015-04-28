@@ -27,21 +27,15 @@
  *                  ENUMS                  *
  *******************************************/
 
-import "nanopb.proto";
-
 /**
  * Alarm Identifier
  */
 enum E_ALARM_ID {
-    option (nanopb_enumopt).long_names = false;
-
     E_ALARM_ID_ANALOGUE_LOW  = 0;     /**< Analogue alarm, low threshold */
     E_ALARM_ID_ANALOGUE_HIGH = 1;     /**< Analogue alarm, high threshold */
 }
 
 enum E_OTAP_CONNECT_TRIGGER {
-    option (nanopb_enumopt).long_names = false;
-
     E_OTAP_CONNECT_TRIGGER_SCHEDULED = 0;     /**< Scheduled connection */
     E_OTAP_CONNECT_TRIGGER_MMI       = 1;     /**< Connection triggered from MMI */
     E_OTAP_CONNECT_TRIGGER_ALARM     = 2;     /**< Connection due to entering alarm state */
@@ -53,8 +47,6 @@ enum E_OTAP_CONNECT_TRIGGER {
  * Database identifier
  */
 enum E_DB_DATABASE {
-    option (nanopb_enumopt).long_names = false;
-
     E_DB_DATABASE_NONE = 0;     /**< No database (ie disable) */
     E_DB_DATABASE_DIAG = 1;     /**< Diagnostics database */
     E_DB_DATABASE_LOG  = 2;     /**< Main log database */
@@ -65,8 +57,6 @@ enum E_DB_DATABASE {
  * Analogue channel identifier
  */
 enum E_ANALOGUE_CHANNEL_ID {
-    option (nanopb_enumopt).long_names = false;
-
     E_ANALOGUE_CHANNEL_ID_NONE                 = 0;
     E_ANALOGUE_CHANNEL_ID_P1                   = 1;
     E_ANALOGUE_CHANNEL_ID_P2                   = 2;
@@ -90,8 +80,6 @@ enum E_ANALOGUE_CHANNEL_ID {
  * Physical channel identifier
  */
 enum E_PHYSICAL_CHANNEL_ID {
-    option (nanopb_enumopt).long_names = false;
-
     E_PHYSICAL_CHANNEL_ID_NONE                             = 0;     /**< No valid channel */
     E_PHYSICAL_CHANNEL_ID_TRANSDUCER_1                     = 1;     /**< First physical transducer on internal bus */
     E_PHYSICAL_CHANNEL_ID_TRANSDUCER_2                     = 2;     /**< Second physical transducer on internal bus */
